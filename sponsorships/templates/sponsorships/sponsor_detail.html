@@ -1,0 +1,174 @@
+{% extends 'sponsorships/base.html' %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item"><a href="{% url 'sponsor_list' %}" class="text-decoration-none">Sponsors</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ sponsor.name }}</li>
+            </ol>
+        </nav>
+        <h2 class="mb-0">{{ sponsor.name }}</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'sponsor_edit' sponsor.pk %}" class="btn btn-outline-light me-2">Edit Details</a>
+        <a href="{% url 'settlement_add' %}" class="btn btn-primary">Add Settlement</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Sponsor Info Card -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                {% if sponsor.logo %}
+                <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" class="img-fluid rounded-circle mb-3 shadow"
+                    style="width: 120px; height: 120px; object-fit: cover;">
+                {% else %}
+                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white mx-auto mb-3 shadow"
+                    style="width: 120px; height: 120px; font-size: 2.5rem; font-weight: bold;">
+                    {{ sponsor.name|slice:":1" }}
+                </div>
+                {% endif %}
+
+                <h4 class="card-title mb-1 text-white">{{ sponsor.name }}</h4>
+                <div class="mb-3">
+                    <span class="badge bg-primary">{{ sponsor.category.name }}</span>
+                    <span
+                        class="badge {% if sponsor.status == 'COMPLETED' %}bg-success{% elif sponsor.status == 'CONFIRMED' %}bg-info{% else %}bg-warning text-dark{% endif %}">
+                        {{ sponsor.get_status_display }}
+                    </span>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="text-start">
+                    <div class="mb-3">
+                        <label class="text-muted small text-uppercase fw-bold">Point of Contact</label>
+                        <div class="fw-medium text-muted">{{ sponsor.poc_name }}</div>
+                        <div class="small text-muted">{{ sponsor.poc_phone }}</div>
+                        <div class="small text-muted">{{ sponsor.poc_email }}</div>
+                    </div>
+                    <div>
+                        <label class="text-muted small text-uppercase fw-bold">Coordinator</label>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center me-2"
+                                style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                {{ sponsor.coordinator.username|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <div class="text-white">{{ sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">{{ sponsor.coordinator.email }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats & Settlements -->
+    <div class="col-md-8">
+        <!-- Stats Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                    <div class="card-body p-3">
+                        <div class="small text-white-50 text-uppercase fw-bold">Pledged Amount</div>
+                        <div class="h3 mb-0 mt-2 fw-bold">₹{{ sponsor.amount_pledged }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-success text-white h-100">
+                    <div class="card-body p-3">
+                        <div class="small text-white-50 text-uppercase fw-bold">Total Received</div>
+                        <div class="h3 mb-0 mt-2 fw-bold">₹{{ sponsor.total_settled_amount }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-dark text-white h-100 border-secondary">
+                    <div class="card-body p-3">
+                        <div class="small text-white-50 text-uppercase fw-bold">Balance</div>
+                        <div class="h3 mb-0 mt-2 fw-bold">₹{{ sponsor.balance_amount }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settlements Table -->
+        <div class="card border-0 shadow-sm">
+            <div
+                class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+                <h5 class="mb-0">Settlement History (Receipts)</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-uppercase text-muted" style="font-size: 0.75rem;">
+                            <tr>
+                                <th class="ps-4 py-3">Date</th>
+                                <th class="py-3">Amount</th>
+                                <th class="py-3">Reference</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3">Proof</th>
+                                <th class="pe-4 py-3 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for settlement in sponsor.settlements.all %}
+                            <tr>
+                                <td class="ps-4">{{ settlement.date }}</td>
+                                <td class="fw-bold">₹{{ settlement.amount }}</td>
+                                <td class="small font-monospace">{{ settlement.reference_number }}</td>
+                                <td>
+                                    {% if settlement.status == 'VERIFIED' %}
+                                    <span
+                                        class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Verified</span>
+                                    {% elif settlement.status == 'REJECTED' %}
+                                    <span
+                                        class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Rejected</span>
+                                    {% else %}
+                                    <span
+                                        class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if settlement.proof %}
+                                    <a href="{{ settlement.proof.url }}" target="_blank"
+                                        class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="View Proof">
+                                        <i class="bi bi-file-earmark-image"></i> View
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-end">
+                                    {% if user.groups.all.0.name == 'Conveners' or user.is_superuser %}
+                                    <a href="{% url 'settlement_verify' settlement.pk %}"
+                                        class="btn btn-sm btn-outline-primary">Verify</a>
+                                    {% else %}
+                                    <span class="text-muted small">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No settlements recorded yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

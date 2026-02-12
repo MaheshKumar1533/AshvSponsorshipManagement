@@ -16,4 +16,5 @@ urlpatterns = [
     path('settlements/<int:pk>/verify/', views.SettlementUpdateView.as_view(), name='settlement_verify'),
     
     path('api/sponsor-images/', views.SponsorImagesAPIView.as_view(), name='sponsor_images_api'),
+    path('demo-fetch/', views.FetchDemoView.as_view(), name='demo_fetch'),
 ]

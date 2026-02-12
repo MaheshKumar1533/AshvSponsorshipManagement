@@ -27,11 +27,14 @@ class SponsorDetailView(LoginRequiredMixin, DetailView):
     template_name = 'sponsorships/sponsor_detail.html'
     context_object_name = 'sponsor'
 
-    def get_queryset(self):
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         user = self.request.user
         if user.groups.filter(name='Conveners').exists() or user.is_superuser:
-            return Sponsor.objects.all()
-        return Sponsor.objects.filter(coordinator=user)
+            context['is_convener'] = True
+        return context
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'sponsorships/dashboard.html'
@@ -43,19 +46,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Common context
         context['categories'] = SponsorshipCategory.objects.all()
         
+        context['all_sponsors'] = Sponsor.objects.all()
         if user.groups.filter(name='Conveners').exists() or user.is_superuser:
             context['is_convener'] = True
             # Removed total_target as per request
             context['total_pledged'] = Sponsor.objects.aggregate(Sum('amount_pledged'))['amount_pledged__sum'] or 0
             context['total_received'] = Settlement.objects.filter(status='VERIFIED').aggregate(Sum('amount'))['amount__sum'] or 0
             context['pending_settlements'] = Settlement.objects.filter(status='PENDING')
-            context['all_sponsors'] = Sponsor.objects.all()
         else:
             context['is_coordinator'] = True
             context['my_sponsors'] = Sponsor.objects.filter(coordinator=user)
             context['my_pledged'] = context['my_sponsors'].aggregate(Sum('amount_pledged'))['amount_pledged__sum'] or 0
             context['my_received'] = Settlement.objects.filter(sponsor__coordinator=user, status='VERIFIED').aggregate(Sum('amount'))['amount__sum'] or 0
-            
+        context['total_pledged'] = Sponsor.objects.aggregate(Sum('amount_pledged'))['amount_pledged__sum'] or 0
+        context['total_received'] = Settlement.objects.filter(status='VERIFIED').aggregate(Sum('amount'))['amount__sum'] or 0
         return context
 
 class SponsorListView(LoginRequiredMixin, ListView):
@@ -63,11 +67,7 @@ class SponsorListView(LoginRequiredMixin, ListView):
     template_name = 'sponsorships/sponsor_list.html'
     context_object_name = 'sponsors'
 
-    def get_queryset(self):
-        user = self.request.user
-        if user.groups.filter(name='Conveners').exists() or user.is_superuser:
-            return Sponsor.objects.all()
-        return Sponsor.objects.filter(coordinator=user)
+
 
 class SponsorCreateView(LoginRequiredMixin, CreateView):
     model = Sponsor
@@ -128,3 +128,6 @@ class SettlementUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return self.request.user.groups.filter(name='Conveners').exists() or self.request.user.is_superuser
+
+class FetchDemoView(TemplateView):
+    template_name = 'sponsorships/fetch_demo.html'

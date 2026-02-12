@@ -65,9 +65,9 @@
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">My Sponsors
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Sponsors
                 </h6>
-                <h2 class="display-5 fw-bold mb-0 text-white">{{ my_sponsors.count }}</h2>
+                <h2 class="display-5 fw-bold mb-0 text-white">{{ all_sponsors.count }}</h2>
             </div>
         </div>
     </div>
@@ -113,7 +113,17 @@
                             <div class="fw-bold">{{ settlement.sponsor.name }}</div>
                             <div class="small text-muted">₹{{ settlement.amount }} • {{ settlement.date }}</div>
                         </div>
+                        <div>
+                        {% if settlement.proof %}
+                        <a href="{{ settlement.proof.url }}" target="_blank"
+                            class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="View Proof">
+                            <i class="bi bi-file-earmark-image"></i> View
+                        </a>
+                        {% else %}
+                        <span class="text-muted small">-</span>
+                        {% endif %}
                         <a href="{% url 'settlement_verify' settlement.pk %}" class="btn btn-sm btn-warning">Verify</a>
+                        </div>
                     </li>
                     {% empty %}
                     <li class="list-group-item bg-transparent text-muted py-4 text-center">

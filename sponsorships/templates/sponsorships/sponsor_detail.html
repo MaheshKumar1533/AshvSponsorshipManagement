@@ -55,16 +55,22 @@
                     </div>
                     <div>
                         <label class="text-muted small text-uppercase fw-bold">Coordinator</label>
+                        {% if sponsor.coordinator %}
                         <div class="d-flex align-items-center mt-1">
                             <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center me-2"
                                 style="width: 32px; height: 32px; font-size: 0.8rem;">
                                 {{ sponsor.coordinator.username|slice:":1"|upper }}
                             </div>
                             <div>
-                                <div class="text-white">{{ sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</div>
-                                <div class="small text-muted" style="font-size: 0.75rem;">{{ sponsor.coordinator.email }}</div>
+                                <div class="text-white">{{
+                                    sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">{{ sponsor.coordinator.email
+                                    }}</div>
                             </div>
                         </div>
+                        {% else %}
+                        <div class="mt-1 text-muted">-</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -149,7 +155,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="pe-4 text-end">
-                                    {% if user.groups.all.0.name == 'Conveners' or user.is_superuser %}
+                                    {% if is_convener %}
                                     <a href="{% url 'settlement_verify' settlement.pk %}"
                                         class="btn btn-sm btn-outline-primary">Verify</a>
                                     {% else %}

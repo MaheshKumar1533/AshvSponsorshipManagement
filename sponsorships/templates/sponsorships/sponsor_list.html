@@ -24,12 +24,11 @@
                         <th class="py-3">Balance</th>
                         <th class="py-3">Status</th>
                         <th class="py-3">Coordinator</th>
-                        <th class="pe-4 py-3 text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sponsor in sponsors %}
-                    <tr>
+                    <tr class="position-relative">
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
                                 {% if sponsor.logo %}
@@ -61,9 +60,7 @@
                                 {{ sponsor.get_status_display }}
                             </span>
                         </td>
-                        <td class="text-muted small">{{ sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</td>
-                        <td class="pe-4 text-end">
-                            <a href="{% url 'sponsor_edit' sponsor.pk %}" class="btn btn-sm btn-outline-light">Edit</a>
+                        <td class="text-muted small">{% if sponsor.coordinator %}{{ sponsor.coordinator.first_name|default:sponsor.coordinator.username }}{% else %}-{% endif %}
                         </td>
                     </tr>
                     {% empty %}

@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ashv_sponsorship.settings')
 django.setup()
 
-from sponsorships.models import SponsorshipCategory
+from sponsorships.models import SponsorshipCategory, Sponsor
 from django.contrib.auth.models import Group, User, Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -40,6 +40,26 @@ def populate():
         print("Superuser 'admin' created.")
     else:
         print("Superuser 'admin' already exists.")
+
+    # Create a dummy sponsor
+    try:
+        category = SponsorshipCategory.objects.first()
+        sponsor, created = Sponsor.objects.get_or_create(
+            name="Dummy Sponsor",
+            defaults={
+                'category': category,
+                'poc_name': "John Doe",
+                'poc_phone': "1234567890",
+                'poc_email': "john@example.com",
+                'status': "CONFIRMED"
+            }
+        )
+        if created:
+            print("Dummy Sponsor created.")
+        else:
+            print("Dummy Sponsor already exists.")
+    except Exception as e:
+        print(f"Error creating dummy sponsor: {e}")
 
 if __name__ == '__main__':
     populate()

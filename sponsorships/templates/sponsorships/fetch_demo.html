@@ -43,14 +43,14 @@
 
             try {
                 // Fetch data from API
-                const response = await fetch('/api/sponsor-images/');
-                
+                const response = await fetch('https://ashvsponsorship.pythonanywhere.com/api/sponsor-images/');
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                
+
                 // Process and display data
                 displaySponsors(data);
 
@@ -73,7 +73,7 @@
 
             // Create gallery HTML
             let html = '';
-            
+
             for (const [category, images] of Object.entries(data)) {
                 html += `
                     <div class="card mb-4 border-0 bg-transparent">

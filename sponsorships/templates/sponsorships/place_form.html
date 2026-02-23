@@ -1,0 +1,80 @@
+{% extends 'sponsorships/base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'place_list' %}">Places Visited</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ object.name|default:"Log New Visit" }}</li>
+            </ol>
+        </nav>
+        <h2 class="mb-0">{% if object %}Edit Visit Details{% else %}Log New Visit{% endif %}</h2>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+
+                        <div class="col-md-12">
+                            <label for="{{ form.city.id_for_label }}" class="form-label fw-bold">City *</label>
+                            {{ form.city }}
+                            {% if form.city.help_text %}
+                            <div class="form-text">{{ form.city.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.city.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">Visit Notes</label>
+                            {{ form.notes }}
+                            {% if form.notes.help_text %}
+                            <div class="form-text">{{ form.notes.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.notes.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                        <a href="{% url 'place_list' %}" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            {% if object %}Save Changes{% else %}Save Visit{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add Bootstrap classes to form fields automatically
+    document.querySelectorAll('input, select, textarea').forEach(function (el) {
+        if (!el.classList.contains('form-control') && !el.classList.contains('form-select')) {
+            if (el.tagName.toLowerCase() === 'select') {
+                el.classList.add('form-select');
+            } else {
+                el.classList.add('form-control');
+            }
+        }
+    });
+</script>
+{% endblock %}

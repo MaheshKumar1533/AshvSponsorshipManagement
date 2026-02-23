@@ -62,10 +62,8 @@
                                 {{ sponsor.coordinator.username|slice:":1"|upper }}
                             </div>
                             <div>
-                                <div class="text-white">{{
-                                    sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</div>
-                                <div class="small text-muted" style="font-size: 0.75rem;">{{ sponsor.coordinator.email
-                                    }}</div>
+                                <div class="text-white">{{ sponsor.coordinator.first_name|default:sponsor.coordinator.username }}</div>
+                                <div class="small text-muted" style="font-size: 0.75rem;">{{ sponsor.coordinator.email }}</div>
                             </div>
                         </div>
                         {% else %}

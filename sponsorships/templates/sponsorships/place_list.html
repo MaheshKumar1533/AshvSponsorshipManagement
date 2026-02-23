@@ -1,0 +1,58 @@
+{% extends 'sponsorships/base.html' %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="mb-0">Places Visited</h2>
+    </div>
+    {% if not is_convener %}
+    <div class="col-auto">
+        <a href="{% url 'place_add' %}" class="btn btn-primary">+ Log New Visit</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">City</th>
+                    {% if is_convener %}
+                    <th>Visited By</th>
+                    {% endif %}
+                    <th>Visit Date</th>
+                    <th>Sponsors Contacted</th>
+                    <th>Confirmed</th>
+                    <th>Rejected</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for place in places %}
+                <tr>
+                    <td class="ps-4 fw-medium">{{ place.city }}</td>
+                    {% if is_convener %}
+                    <td>{{ place.visited_by.get_full_name|default:place.visited_by.username }}</td>
+                    {% endif %}
+                    <td>{{ place.visit_date|date:"M d, Y" }}</td>
+                    <td><span class="badge bg-secondary">{{ place.total_sponsors_contacted }}</span></td>
+                    <td><span class="badge bg-success">{{ place.total_confirmed }}</span></td>
+                    <td><span class="badge bg-danger">{{ place.total_rejected }}</span></td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'place_detail' place.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if is_convener %}8{% else %}7{% endif %}" class="text-center py-5 text-muted">
+                        <i class="bi bi-geo-alt fs-1 d-block mb-3"></i>
+                        No places visited yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

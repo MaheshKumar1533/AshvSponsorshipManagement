@@ -1,0 +1,140 @@
+{% extends 'sponsorships/base.html' %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'place_list' %}">Places Visited</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ place.city }}</li>
+            </ol>
+        </nav>
+        <h2 class="mb-0">{{ place.city }}</h2>
+        <p class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ place.city }}</p>
+    </div>
+    {% if not is_convener and place.visited_by == request.user %}
+    <div class="col-auto">
+        <a href="{% url 'sponsor_add' %}?place={{ place.id }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Log Organization Contact
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Visit Stats -->
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem;">Sponsors Contacted</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ place.total_sponsors_contacted }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm bg-success text-white">
+            <div class="card-body text-center">
+                <h6 class="text-uppercase mb-2" style="font-size: 0.8rem;">Confirmed</h6>
+                <h2 class="display-6 fw-bold mb-0 text-white">{{ place.total_confirmed }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm bg-danger text-white">
+            <div class="card-body text-center">
+                <h6 class="text-uppercase mb-2" style="font-size: 0.8rem;">Rejected</h6>
+                <h2 class="display-6 fw-bold mb-0 text-white">{{ place.total_rejected }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2 border-bottom pb-2" style="font-size: 0.8rem;">Visit Info</h6>
+                <p class="mb-1 small"><strong>Coordinator:</strong> {{ place.visited_by.get_full_name|default:place.visited_by.username }}</p>
+                <p class="mb-0 small"><strong>Date:</strong> {{ place.visit_date|date:"N j, Y" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if place.notes %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-transparent d-flex align-items-center">
+        <h5 class="mb-0">Visit Notes</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-0" style="white-space: pre-wrap;">{{ place.notes }}</p>
+    </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Organizations Contacted</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Organization Name</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Feedback</th>
+                    <th>Amount Pledged</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sponsor in place.sponsors.all %}
+                <tr>
+                    <td class="ps-4 fw-medium">
+                        {% if sponsor.logo %}
+                        <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}" class="rounded me-2"
+                            style="width: 32px; height: 32px; object-fit: cover;">
+                        {% else %}
+                        <div class="d-inline-flex align-items-center justify-content-center rounded bg-secondary text-white me-2"
+                            style="width: 32px; height: 32px; font-size: 0.9rem;">
+                            {{ sponsor.name|make_list|first|upper }}
+                        </div>
+                        {% endif %}
+                        {{ sponsor.name }}
+                    </td>
+                    <td>{{ sponsor.category.name|default:"-" }}</td>
+                    <td>
+                        <span
+                            class="badge {% if sponsor.status == 'CONFIRMED' %}bg-warning text-dark{% elif sponsor.status == 'COMPLETED' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ sponsor.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span
+                            class="badge {% if sponsor.feedback_type == 'POSITIVE' %}bg-success{% elif sponsor.feedback_type == 'NEGATIVE' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ sponsor.feedback_type|default:"None" }}
+                        </span>
+                    </td>
+                    <td>₹{{ sponsor.amount_pledged }}</td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'sponsor_detail' sponsor.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if not is_convener and sponsor.coordinator == request.user %}
+                        {% if sponsor.status != 'CONFIRMED' and sponsor.status != 'COMPLETED' %}
+                        <a href="{% url 'sponsor_edit' sponsor.pk %}?status=CONFIRMED"
+                            class="btn btn-sm btn-success ms-1"><i class="bi bi-star-fill me-1"></i>Make Sponsor</a>
+                        {% endif %}
+                        <a href="{% url 'sponsor_edit' sponsor.pk %}"
+                            class="btn btn-sm btn-outline-secondary ms-1">Edit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        No organizations have been logged for this location yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

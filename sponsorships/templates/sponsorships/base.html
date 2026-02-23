@@ -158,6 +158,10 @@
             background-color: rgba(99, 102, 241, 0.2);
             color: var(--primary-color);
         }
+
+        label {
+            color: white;
+        }
     </style>
 </head>
 
@@ -175,7 +179,10 @@
                         <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'sponsor_list' %}">Sponsors</a>
+                        <a class="nav-link" href="{% url 'organization_list' %}">Organizations Visited</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'sponsor_list' %}">Confirmed Sponsors</a>
                     </li>
                     {% endif %}
                 </ul>

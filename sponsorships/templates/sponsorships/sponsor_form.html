@@ -5,7 +5,15 @@
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent border-bottom">
-                <h4 class="mb-0 text-white">{% if object %}Edit{% else %}Add{% endif %} Sponsor</h4>
+                <h4 class="mb-0 text-white">
+                    {% if is_organization_log %}
+                    Log Organization Visited
+                    {% elif object %}
+                    Edit Sponsor Details
+                    {% else %}
+                    Add Sponsor
+                    {% endif %}
+                </h4>
             </div>
             <div class="card-body p-4">
                 <form method="post" enctype="multipart/form-data">
@@ -13,7 +21,8 @@
 
                     {% for field in form %}
                     <div class="mb-4">
-                        <label for="{{ field.id_for_label }}" class="form-label text-muted text-uppercase fw-semibold" style="font-size: 0.75rem; letter-spacing: 0.5px;">{{ field.label }}</label>
+                        <label for="{{ field.id_for_label }}" class="form-label text-muted text-uppercase fw-semibold"
+                            style="font-size: 0.75rem; letter-spacing: 0.5px;">{{ field.label }}</label>
 
                         {% if field.errors %}
                         <div class="alert alert-danger py-2 mb-2">
@@ -21,26 +30,8 @@
                         </div>
                         {% endif %}
 
-                        {% if field.name == 'category' %}
-                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-select bg-dark text-light border-secondary">
-                            {% for value, label in field.field.choices %}
-                            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                        {{ field }}
 
-                        {% elif field.name == 'status' %}
-                        <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-select bg-dark text-light border-secondary">
-                            {% for value, label in field.field.choices %}
-                            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-
-                        {% elif field.name == 'logo' %}
-                        <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control bg-dark text-light border-secondary">
-
-                        {% else %}
-                        <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control bg-dark text-light border-secondary" {% if field.value %}value="{{ field.value }}"{% endif %}>
-                        {% endif %}
 
                         {% if field.help_text %}
                         <div class="form-text text-muted small mt-1">{{ field.help_text }}</div>
@@ -49,12 +40,47 @@
                     {% endfor %}
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
-                        <a href="{% url 'sponsor_list' %}" class="btn btn-outline-light px-4">Cancel</a>
-                        <button type="submit" class="btn btn-primary px-4">Save Sponsor</button>
+                        <a href="{{ request.META.HTTP_REFERER|default:'/sponsors/' }}"
+                            class="btn btn-outline-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            {% if is_organization_log %}Save Organization{% else %}Save Sponsor{% endif %}
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input, select, textarea').forEach(function (el) {
+            if (el.type !== 'hidden' && el.type !== 'submit') {
+                if (el.tagName.toLowerCase() === 'select') {
+                    el.classList.add('form-select', 'bg-dark', 'text-light', 'border-secondary');
+                } else {
+                    el.classList.add('form-control', 'bg-dark', 'text-light', 'border-secondary');
+                    if (el.type === 'file') {
+                        // File inputs specific styles if needed
+                    }
+                }
+            }
+        });
+
+        // Quick feature: if pre-filled place, set it
+        const urlParams = new URLSearchParams(window.location.search);
+        const placeId = urlParams.get('place');
+        if (placeId) {
+            const placeSelect = document.querySelector('select[name="place"]');
+            if (placeSelect) placeSelect.value = placeId;
+        }
+
+        // Quick feature: auto-set status if provided in URL (e.g. Make Sponsor button)
+        const initStatus = urlParams.get('status');
+        if (initStatus) {
+            const statusSelect = document.querySelector('select[name="status"]');
+            if (statusSelect) statusSelect.value = initStatus;
+        }
+    });
+</script>
 {% endblock %}

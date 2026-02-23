@@ -6,11 +6,13 @@
         <h2 class="mb-1">Hello, {{ user.first_name|default:user.username }} 👋</h2>
         <p class="text-muted mb-0">Here's what's happening with Ashv sponsorships today.</p>
     </div>
+</div>
+<div class="col-auto">
     {% if not is_convener %}
-    <div class="col-auto">
-        <a href="{% url 'sponsor_add' %}" class="btn btn-primary">+ New Sponsor</a>
-    </div>
+    <a href="{% url 'place_add' %}" class="btn btn-outline-primary me-2"><i class="bi bi-geo-alt"></i> Log Visit</a>
+    <a href="{% url 'sponsor_add' %}" class="btn btn-primary">+ Log Organization Visited</a>
     {% endif %}
+</div>
 </div>
 
 <!-- Stats Row -->
@@ -65,9 +67,105 @@
     <div class="col-md-4">
         <div class="card h-100">
             <div class="card-body">
-                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Sponsors
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total
+                    Sponsors
                 </h6>
                 <h2 class="display-5 fw-bold mb-0 text-white">{{ all_sponsors.count }}</h2>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Field Work Report Dashboard -->
+<div class="row mb-3">
+    <div class="col">
+        <h4 class="mb-0">Field Work Report</h4>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    {% if is_convener %}
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Global Places
+                    Visited</h6>
+                <h2 class="display-6 fw-bold mb-0 text-dark">{{ global_places_visited }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Top
+                    Coordinator (By Confirmed Visits)</h6>
+                {% if top_performing_coordinator %}
+                <h4 class="fw-bold mb-0 text-primary">{{ top_performing_coordinator.coordinator__username }}</h4>
+                <p class="text-muted mb-0 small">₹{{ top_performing_coordinator.total_amount }}</p>
+                {% else %}
+                <h4 class="fw-bold mb-0 text-muted">No data yet</h4>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Recent Visits
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    {% for p in places %}
+                    <li class="mb-1 small">
+                        <strong>{{ p.city }}</strong> - {{ p.visited_by.username }}
+                    </li>
+                    {% empty %}
+                    <li class="small text-muted">No visits recorded.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{% url 'place_list' %}" class="btn btn-sm btn-link px-0 mt-2">View All Visits</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Places
+                    Visited</h6>
+                <h2 class="display-6 fw-bold mb-0 text-dark">{{ my_places_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Sponsors
+                    Acquired</h6>
+                <h2 class="display-6 fw-bold mb-0 text-primary">{{ sponsors_added_from_visits }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Confirmed
+                    Amount</h6>
+                <h2 class="display-6 fw-bold mb-0 text-success">₹{{ confirmed_sponsorship_amount }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-uppercase text-muted" style="font-size: 0.8rem;">Positive</span>
+                    <span class="badge bg-success rounded-pill">{{ positive_feedback_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-uppercase text-muted" style="font-size: 0.8rem;">Negative</span>
+                    <span class="badge bg-danger rounded-pill">{{ negative_feedback_count }}</span>
+                </div>
             </div>
         </div>
     </div>
@@ -83,14 +181,20 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-3 d-md-flex">
-                    <a href="{% url 'sponsor_add' %}" class="btn btn-primary flex-fill">
-                        <i class="bi bi-plus-circle"></i> Add New Sponsor
+                    <a href="{% url 'place_add' %}" class="btn btn-primary flex-fill">
+                        <i class="bi bi-geo-alt"></i> Log Visit
                     </a>
-                    <a href="{% url 'settlement_add' %}" class="btn btn-outline-light flex-fill">
+                    <a href="{% url 'sponsor_add' %}" class="btn btn-outline-primary flex-fill">
+                        <i class="bi bi-plus-circle"></i> Log Organization Visited
+                    </a>
+                    <a href="{% url 'settlement_add' %}" class="btn btn-outline-success flex-fill">
                         <i class="bi bi-cash"></i> Record Settlement
                     </a>
+                    <a href="{% url 'place_list' %}" class="btn btn-outline-secondary flex-fill">
+                        <i class="bi bi-map"></i> View Places
+                    </a>
                     <a href="{% url 'sponsor_list' %}" class="btn btn-dark flex-fill">
-                        <i class="bi bi-list"></i> View All Sponsors
+                        <i class="bi bi-list"></i> View Sponsors
                     </a>
                 </div>
             </div>
@@ -114,15 +218,16 @@
                             <div class="small text-muted">₹{{ settlement.amount }} • {{ settlement.date }}</div>
                         </div>
                         <div>
-                        {% if settlement.proof %}
-                        <a href="{{ settlement.proof.url }}" target="_blank"
-                            class="btn btn-sm btn-light border" data-bs-toggle="tooltip" title="View Proof">
-                            <i class="bi bi-file-earmark-image"></i> View
-                        </a>
-                        {% else %}
-                        <span class="text-muted small">-</span>
-                        {% endif %}
-                        <a href="{% url 'settlement_verify' settlement.pk %}" class="btn btn-sm btn-warning">Verify</a>
+                            {% if settlement.proof %}
+                            <a href="{{ settlement.proof.url }}" target="_blank" class="btn btn-sm btn-light border"
+                                data-bs-toggle="tooltip" title="View Proof">
+                                <i class="bi bi-file-earmark-image"></i> View
+                            </a>
+                            {% else %}
+                            <span class="text-muted small">-</span>
+                            {% endif %}
+                            <a href="{% url 'settlement_verify' settlement.pk %}"
+                                class="btn btn-sm btn-warning">Verify</a>
                         </div>
                     </li>
                     {% empty %}
